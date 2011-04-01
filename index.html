@@ -78,6 +78,7 @@ body {
       <div id="urlbox"><form><input id="urlinput" type="text" /></form></div>
       <div id="go"><button id="go">go</button></div>
       <div id="stop"><button id="stop">stop</button></div>
+      <div id="save"><button id="save">save</button></div>
     </div>
     <div id="browserContentArea">
       <!-- what if iframes were how the browser HTML embedded web content?
@@ -95,7 +96,6 @@ body {
   <script type="text/javascript">
 
 const url = require("url");
-const store = require("temp-store");
 // in memory browser history, an array of urls
 var gHistory = [];
 // our current point in history
@@ -113,23 +113,27 @@ document.getElementById('contentFrame').addEventListener("ChromelessLoadStart", 
   }
 }, false, true);
 
-document.getElementById('contentFrame').addEventListener("ChromelessLoadStop", function(e) {
-
-  store.init("test.html");
-  var data = $('#contentFrame').contents().find("body").html();
- 
-  mutation();
-
-  //store.save(data);
-
-}, false, true);
-
-
 docFrame = null; 
+
+function saveFile() { 
+
+    mutation();
+    var data = $('#contentFrame').contents().find("body").html();
+    var userTempDirectory = require('app-paths').tmpDir; 
+    var file = require("file");
+    var path = require("path");
+    var outputDir = path.join(userTempDirectory, "chromeless-ereader"); 
+    var outputDirFile = new file.File(outputDir); 
+
+    try { 
+       file.mkpath(outputDir);
+    } catch(i) { } 
+    file.write(require("path").join(outputDir,"title.html"), data);
+} 
 
 function mutation() { 	
 
-console.log("!!!");
+	console.log("!!!");
 
 	var doc = document.getElementById("contentFrame").contentDocument; 
 	docFrame = document.getElementById("contentFrame").contentDocument; 
@@ -162,6 +166,9 @@ readability.init();
 // the ready handler would run once the browser process was initialized?
 $(document).ready(function() {
 
+    function save() { 
+	saveFile(); 
+    } 
     function stop () { 
       var frame = document.getElementById("contentFrame");
       require("iframe-controls").stopload(frame);
@@ -182,6 +189,7 @@ $(document).ready(function() {
     // navigate to the url specified
     $("#urlbox > form").submit(function() { navigate(); return false; });
     $("#go").click(function() { navigate(); });
+    $("#save").click(function() { save(); });
     $("#stop").click(function() { stop(); });
     // reload and go are equivalent.  desired?
     $("#reload").click(function() { navigate(); });
