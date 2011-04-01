@@ -125,12 +125,7 @@ var readability = {
 		var articleTools = docFrame.createElement("DIV");
 
 		articleTools.id        = "readTools";
-		articleTools.innerHTML = "\
-			<a href='#' onclick='return window.location.reload()' title='Reload original page' id='reload-page'>Reload Original Page</a>\
-			<a href='#' onclick='javascript:window.print();' title='Print page' id='print-page'>Print Page</a>\
-			<a href='#' onclick='readability.emailBox(); return false;' title='Email page' id='email-page'>Email Page</a>\
-			<a href='#' onclick='readability.kindleBox(); return false;' title='Send to Amazon Kindle' id='kindle-page'>Send to Kindle</a>\
-		";
+		articleTools.innerHTML = "<style> html { background:white } body { margin:2em } </style>";
 
 		return articleTools;
 	},
@@ -157,14 +152,7 @@ var readability = {
 		var articleFooter = docFrame.createElement("DIV");
 
 		articleFooter.id = "readFooter";
-		articleFooter.innerHTML = "\
-			<a href='http://lab.arc90.com/experiments/readability'><img src='http://lab.arc90.com/experiments/readability/images/footer-readability.png'></a>\
-			<a href='http://www.arc90.com'><img src='http://lab.arc90.com/experiments/readability/images/footer-arc90.png'></a>\
-			<a href='http://www.twitter.com/arc90' class='footer-twitterLink'>Follow us on Twitter &raquo;</a>\
-	                <div class='footer-right' >\
-	                        <span class='version'>Readability version " + readability.version + "</span>\
-					</div>\
-		";
+		articleFooter.innerHTML = "<div>Content transcoding by Readability API</div>";
 
 		return articleFooter;
 	},

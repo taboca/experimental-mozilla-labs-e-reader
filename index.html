@@ -79,6 +79,7 @@ body {
       <div id="go"><button id="go">go</button></div>
       <div id="stop"><button id="stop">stop</button></div>
       <div id="save"><button id="save">save</button></div>
+      <div id="list"><button id="list">list</button></div>
     </div>
     <div id="browserContentArea">
       <!-- what if iframes were how the browser HTML embedded web content?
@@ -96,6 +97,7 @@ body {
   <script type="text/javascript">
 
 const url = require("url");
+var docFrame = null; 
 // in memory browser history, an array of urls
 var gHistory = [];
 // our current point in history
@@ -113,12 +115,24 @@ document.getElementById('contentFrame').addEventListener("ChromelessLoadStart", 
   }
 }, false, true);
 
-docFrame = null; 
+function list() { 
 
-function saveFile() { 
+    var userTempDirectory = require('app-paths').tmpDir; 
+    var file = require("file");
+    var path = require("path");
+    var outputDir = path.join(userTempDirectory, "chromeless-ereader"); 
+    var outputDirFile = new file.File(outputDir); 
+    if(outputDirFile.isDirectory()) { 
+	var input = document.getElementById("urlinput").value = require('url').fromFilename(outputDir);
+        $("#contentFrame").attr("src", input);
+    } 
+} 
+
+function save() { 
 
     mutation();
-    var data = $('#contentFrame').contents().find("body").html();
+    //var data = $('#contentFrame').contents().html();
+    var data = $('#contentFrame').contents().find("html").html();
     var userTempDirectory = require('app-paths').tmpDir; 
     var file = require("file");
     var path = require("path");
@@ -128,47 +142,26 @@ function saveFile() {
     try { 
        file.mkpath(outputDir);
     } catch(i) { } 
-    file.write(require("path").join(outputDir,"title.html"), data);
+    var docTitle = $('#contentFrame').contents().find('title').text(); 
+    file.write(require('path').join(outputDir,docTitle),data);
 } 
 
 function mutation() { 	
-
-	console.log("!!!");
-
-	var doc = document.getElementById("contentFrame").contentDocument; 
-	docFrame = document.getElementById("contentFrame").contentDocument; 
-
-	readStyle='style-terminal';
+        // We just pass docFrame which is taken from Readability JS 
+	readStyle='style-plain';
 	readSize='size-medium';
 	readMargin='margin-wide';
-	_readability_script=doc.createElement('SCRIPT');
-	_readability_script.type='text/javascript';
-	_readability_script.src='./vendor/readability-0.5.1/js/readability.js?x='+(Math.random());
-//	doc.getElementsByTagName('head')[0].appendChild(_readability_script);
-
-readability.init();
-
-	_readability_css=doc.createElement('LINK');
-	_readability_css.rel='stylesheet';
-	_readability_css.href='./vendor/readability-0.5.1/css/readability.css';
-	_readability_css.type='text/css';
-	_readability_css.media='screen';
-	doc.getElementsByTagName('head')[0].appendChild(_readability_css);
-	_readability_print_css=doc.createElement('LINK');
-	_readability_print_css.rel='stylesheet';
-	_readability_print_css.href='./vendor/readability-0.5.1/css/readability-print.css';
-	_readability_print_css.media='print';
-	_readability_print_css.type='text/css';
-	doc.getElementsByTagName('head')[0].appendChild(_readability_print_css);
-
+	docFrame = document.getElementById("contentFrame").contentDocument; 
+	readability.init();
+        var style = docFrame.createElement('style');
+        docFrame.getElementsByTagName('head')[0].appendChild(style);
+        var styleZero = docFrame.styleSheets[document.styleSheets.length - 1]
+        styleZero.insertRule("html { background:white; } body { margin:2em } .style-plain { font-family: verdana }", 0);
 }
 
 // the ready handler would run once the browser process was initialized?
 $(document).ready(function() {
 
-    function save() { 
-	saveFile(); 
-    } 
     function stop () { 
       var frame = document.getElementById("contentFrame");
       require("iframe-controls").stopload(frame);
@@ -190,6 +183,7 @@ $(document).ready(function() {
     $("#urlbox > form").submit(function() { navigate(); return false; });
     $("#go").click(function() { navigate(); });
     $("#save").click(function() { save(); });
+    $("#list").click(function() { list(); });
     $("#stop").click(function() { stop(); });
     // reload and go are equivalent.  desired?
     $("#reload").click(function() { navigate(); });
